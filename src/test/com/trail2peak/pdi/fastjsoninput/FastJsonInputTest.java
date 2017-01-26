@@ -1,16 +1,23 @@
 package com.trail2peak.pdi.fastjsoninput;
 
-import junit.framework.TestCase;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
 import org.pentaho.di.TestFailedException;
 import org.pentaho.di.TestUtilities;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.RowMetaAndData;
+import org.pentaho.di.core.exception.KettlePluginException;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.row.value.ValueMetaFactory;
+import org.pentaho.di.core.row.value.ValueMetaInteger;
+import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.trans.RowProducer;
 import org.pentaho.di.trans.RowStepCollector;
 import org.pentaho.di.trans.Trans;
@@ -19,10 +26,7 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import junit.framework.TestCase;
 
 /**
  * Created by jadametz on 8/20/15.
@@ -51,22 +55,22 @@ public class FastJsonInputTest extends TestCase {
 
         FastJsonInputField if1 = new FastJsonInputField("id");
         if1.setPath("$.[*].id");
-        if1.setType(ValueMeta.TYPE_INTEGER);
+        if1.setType(ValueMetaInteger.TYPE_INTEGER);
         if1.setTrimType(FastJsonInputField.TYPE_TRIM_NONE);
 
         FastJsonInputField if2 = new FastJsonInputField("first_name");
         if2.setPath("$.[*].first_name");
-        if2.setType(ValueMeta.TYPE_STRING);
+        if2.setType(ValueMetaString.TYPE_STRING);
         if2.setTrimType(FastJsonInputField.TYPE_TRIM_NONE);
 
         FastJsonInputField if3 = new FastJsonInputField("last_name");
         if3.setPath("$.[*].last_name");
-        if3.setType(ValueMeta.TYPE_STRING);
+        if3.setType(ValueMetaString.TYPE_STRING);
         if3.setTrimType(FastJsonInputField.TYPE_TRIM_NONE);
 
         FastJsonInputField if4 = new FastJsonInputField("city");
         if4.setPath("$.[*].city");
-        if4.setType(ValueMeta.TYPE_STRING);
+        if4.setType(ValueMetaString.TYPE_STRING);
         if4.setTrimType(FastJsonInputField.TYPE_TRIM_NONE);
 
         FastJsonInputField[] inputFields = new FastJsonInputField[4];
@@ -99,10 +103,11 @@ public class FastJsonInputTest extends TestCase {
     /**
      * Create input data for test case 1
      * @return list of metadata/data couples
+     * @throws KettlePluginException 
      */
-    private List<RowMetaAndData> createInputData(String data) {
+    private List<RowMetaAndData> createInputData(String data) throws KettlePluginException {
         List<RowMetaAndData> list = new ArrayList<RowMetaAndData>();
-        ValueMetaInterface[] valuesMeta = {new ValueMeta("json_data", ValueMeta.TYPE_STRING)};
+        ValueMetaInterface[] valuesMeta = {ValueMetaFactory.createValueMeta("json_data", ValueMetaString.TYPE_STRING)};
         RowMetaInterface rm = createRowMetaInterface(valuesMeta);
 
         Object[] r1 = new Object[] {data};
@@ -116,12 +121,13 @@ public class FastJsonInputTest extends TestCase {
      * Create result data for test case 1. Each list object should mirror the output of the parsed JSON
      *
      * @return list of metadata/data couples of how the result should look.
+     * @throws KettlePluginException 
      */
-    private List<RowMetaAndData> createExpectedResults() {
+    private List<RowMetaAndData> createExpectedResults() throws KettlePluginException {
         List<RowMetaAndData> list = new ArrayList<RowMetaAndData>();
         ValueMetaInterface[] valuesMeta =
-                { new ValueMeta("id", ValueMeta.TYPE_INTEGER), new ValueMeta("first_name", ValueMeta.TYPE_STRING),
-                        new ValueMeta("last_name", ValueMeta.TYPE_STRING), new ValueMeta("city", ValueMeta.TYPE_STRING)};
+                { ValueMetaFactory.createValueMeta("id", ValueMetaInteger.TYPE_INTEGER), ValueMetaFactory.createValueMeta("first_name", ValueMetaString.TYPE_STRING),
+                        ValueMetaFactory.createValueMeta("last_name", ValueMetaString.TYPE_STRING), ValueMetaFactory.createValueMeta("city", ValueMetaString.TYPE_STRING)};
         RowMetaInterface rm = createRowMetaInterface(valuesMeta);
 
         Object[] r1 = new Object[] { "123", "Jesse", "Adametz", "Santa Barbara" };

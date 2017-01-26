@@ -38,19 +38,19 @@
 		<dependency>
 			<groupId>pentaho-kettle</groupId>
 			<artifactId>kettle-core</artifactId>
-			<version>5.0.9</version>
+			<version>6.1.0.9-307</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>pentaho-kettle</groupId>
 			<artifactId>kettle-engine</artifactId>
-			<version>5.0.9</version>
+			<version>6.1.0.9-307</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>pentaho-kettle</groupId>
 			<artifactId>kettle-ui-swt</artifactId>
-			<version>5.0.9</version>
+			<version>6.1.0.9-307</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -88,7 +88,11 @@
 			<artifactId>asm</artifactId>
 			<version>1.0.2</version>
 		</dependency>
-
+		<dependency>
+			<groupId>commons-vfs</groupId>
+			<artifactId>commons-vfs</artifactId>
+			<version>20030518103800</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -223,7 +227,7 @@
 								<echo message="Looking for local PDI installation in ${pdi.home}"/>
 
 								<!-- change these to adapt to your environment -->
-								<property name="kettle-dir" location="your_kettle_4.x_dir_here" />
+								<property name="kettle-dir" location="%PROGRAMFILES%/Pentaho/pdi-ce-6.0.1.0-386/data-integration" />
 								<available file="${pdi.home}" type="dir" property="kettle-dir.present" />
 
 								<fail unless="kettle-dir.present" message="PDI installation not found. Please specify the path to your PDI installation in build/build.properties" />

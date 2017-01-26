@@ -2,8 +2,8 @@ package com.trail2peak.pdi.fastjsoninput;
 
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleValueException;
-import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.row.value.ValueMetaBase;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
 import org.w3c.dom.Node;
@@ -100,7 +100,7 @@ public class FastJsonInputField implements Cloneable {
 	public FastJsonInputField(Node fnode) throws KettleValueException {
 		setName(XMLHandler.getTagValue(fnode, "name"));
 		setPath(XMLHandler.getTagValue(fnode, "path"));
-		setType(ValueMeta.getType(XMLHandler.getTagValue(fnode, "type")));
+		setType(ValueMetaBase.getType(XMLHandler.getTagValue(fnode, "type")));
 		setFormat(XMLHandler.getTagValue(fnode, "format"));
 		setCurrencySymbol(XMLHandler.getTagValue(fnode, "currency"));
 		setDecimalSymbol(XMLHandler.getTagValue(fnode, "decimal"));
@@ -193,7 +193,7 @@ public class FastJsonInputField implements Cloneable {
 	}
 
 	public String getTypeDesc() {
-		return ValueMeta.getTypeDesc(type);
+		return ValueMetaBase.getTypeDesc(type);
 	}
 
 	public void setType(int type) {

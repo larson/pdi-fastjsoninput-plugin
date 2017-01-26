@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedHashMap;
 
-import org.apache.commons.vfs.FileObject;
+import org.apache.commons.vfs2.FileObject;
 import org.json.simple.JSONObject;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.ResultFile;
@@ -492,7 +492,7 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 				Object jo = ls.get( data.recordnr );
 				if (jo != null) {
 					if (jo instanceof LinkedHashMap) {
-						nodevalue = JSONObject.toJSONString((LinkedHashMap) jo);
+						nodevalue = JSONObject.toJSONString((LinkedHashMap<?, ?>) jo);
 					} else {
 						nodevalue = ls.get(data.recordnr).toString();
 					}

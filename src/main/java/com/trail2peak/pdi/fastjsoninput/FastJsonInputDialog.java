@@ -33,7 +33,7 @@ import org.pentaho.di.core.Props;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.fileinput.FileInputList;
 import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMeta;
+import org.pentaho.di.core.row.value.ValueMetaBase;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
@@ -932,7 +932,7 @@ public class FastJsonInputDialog extends BaseStepDialog implements
 						ColumnInfo.COLUMN_TYPE_TEXT, false),
 				new ColumnInfo(BaseMessages.getString(PKG,
 						"FastJsonInputDialog.FieldsTable.Type.Column"),
-						ColumnInfo.COLUMN_TYPE_CCOMBO, ValueMeta.getTypes(),
+						ColumnInfo.COLUMN_TYPE_CCOMBO, ValueMetaBase.getTypes(),
 						true),
 				new ColumnInfo(BaseMessages.getString(PKG,
 						"FastJsonInputDialog.FieldsTable.Format.Column"),
@@ -1514,7 +1514,7 @@ public class FastJsonInputDialog extends BaseStepDialog implements
 
 			field.setName(item.getText(1));
 			field.setPath(item.getText(2));
-			field.setType(ValueMeta.getType(item.getText(3)));
+			field.setType(ValueMetaBase.getType(item.getText(3)));
 			field.setFormat(item.getText(4));
 			field.setLength(Const.toInt(item.getText(5), -1));
 			field.setPrecision(Const.toInt(item.getText(6), -1));

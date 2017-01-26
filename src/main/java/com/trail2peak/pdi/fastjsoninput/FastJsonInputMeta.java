@@ -4,19 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.vfs.FileObject;
+import org.apache.commons.vfs2.FileObject;
 import org.pentaho.di.core.CheckResult;
 import org.pentaho.di.core.CheckResultInterface;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettlePluginException;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.fileinput.FileInputList;
 import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.row.value.ValueMetaBase;
+import org.pentaho.di.core.row.value.ValueMetaBoolean;
+import org.pentaho.di.core.row.value.ValueMetaDate;
 import org.pentaho.di.core.row.value.ValueMetaFactory;
+import org.pentaho.di.core.row.value.ValueMetaInteger;
+import org.pentaho.di.core.row.value.ValueMetaNone;
+import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
@@ -828,6 +834,12 @@ public class FastJsonInputMeta extends BaseStepMeta implements
 
 	}
 
+	/* 
+	 * Gets the fields
+	 * 
+	 * (non-Javadoc)
+	 * @see org.pentaho.di.trans.step.BaseStepMeta#getFields(org.pentaho.di.core.row.RowMetaInterface, java.lang.String, org.pentaho.di.core.row.RowMetaInterface[], org.pentaho.di.trans.step.StepMeta, org.pentaho.di.core.variables.VariableSpace, org.pentaho.di.repository.Repository, org.pentaho.metastore.api.IMetaStore)
+	 */
 	public void getFields(RowMetaInterface r, String name,
 			RowMetaInterface[] info, StepMeta nextStep, VariableSpace space,
 			Repository repository, IMetaStore metaStore)
@@ -837,8 +849,8 @@ public class FastJsonInputMeta extends BaseStepMeta implements
 			FastJsonInputField field = inputFields[i];
 
 			int type = field.getType();
-			if (type == ValueMeta.TYPE_NONE) {
-				type = ValueMeta.TYPE_STRING;
+			if (type == ValueMetaNone.TYPE_NONE) {
+				type = ValueMetaString.TYPE_STRING;
 			}
 			try {
 				ValueMetaInterface v = ValueMetaFactory.createValueMeta(
@@ -855,92 +867,133 @@ public class FastJsonInputMeta extends BaseStepMeta implements
 				throw new KettleStepException(e);
 			}
 		}
-
+		
 		if (includeFilename) {
-			ValueMetaInterface v = new ValueMeta(
-					space.environmentSubstitute(filenameField),
-					ValueMeta.TYPE_STRING);
-			v.setLength(250);
-			v.setPrecision(-1);
-			v.setOrigin(name);
-			r.addValueMeta(v);
+			ValueMetaInterface v;
+			try {
+				v = ValueMetaFactory.createValueMeta(
+						space.environmentSubstitute(filenameField),
+						ValueMetaString.TYPE_STRING);
+				v.setLength(250);
+				v.setPrecision(-1);
+				v.setOrigin(name);
+				r.addValueMeta(v);
+			} catch (KettlePluginException e) {
+				throw new KettleStepException(e);
+			}
 		}
 
 		if (includeRowNumber) {
-			ValueMetaInterface v = new ValueMeta(
-					space.environmentSubstitute(rowNumberField),
-					ValueMeta.TYPE_INTEGER);
-			v.setLength(ValueMetaInterface.DEFAULT_INTEGER_LENGTH, 0);
-			v.setOrigin(name);
-			r.addValueMeta(v);
+			try {
+				ValueMetaInterface v = ValueMetaFactory.createValueMeta(
+						space.environmentSubstitute(rowNumberField),
+						ValueMetaInteger.TYPE_INTEGER);
+				v.setLength(ValueMetaInterface.DEFAULT_INTEGER_LENGTH, 0);
+				v.setOrigin(name);
+				r.addValueMeta(v);
+			} catch (KettlePluginException e) {
+				throw new KettleStepException(e);
+			}
 		}
 		// Add additional fields
 
 		if (getShortFileNameField() != null
 				&& getShortFileNameField().length() > 0) {
-			ValueMetaInterface v = new ValueMeta(
-					space.environmentSubstitute(getShortFileNameField()),
-					ValueMeta.TYPE_STRING);
-			v.setLength(100, -1);
-			v.setOrigin(name);
-			r.addValueMeta(v);
+			try {
+				ValueMetaInterface v = ValueMetaFactory.createValueMeta(
+						space.environmentSubstitute(getShortFileNameField()),
+						ValueMetaString.TYPE_STRING);
+				v.setLength(100, -1);
+				v.setOrigin(name);
+				r.addValueMeta(v);
+			} catch (KettlePluginException e) {
+				throw new KettleStepException(e);
+			}
 		}
 		if (getExtensionField() != null && getExtensionField().length() > 0) {
-			ValueMetaInterface v = new ValueMeta(
-					space.environmentSubstitute(getExtensionField()),
-					ValueMeta.TYPE_STRING);
-			v.setLength(100, -1);
-			v.setOrigin(name);
-			r.addValueMeta(v);
+			try {
+				ValueMetaInterface v = ValueMetaFactory.createValueMeta(
+						space.environmentSubstitute(getExtensionField()),
+						ValueMetaString.TYPE_STRING);
+				v.setLength(100, -1);
+				v.setOrigin(name);
+				r.addValueMeta(v);
+			} catch (KettlePluginException e) {
+				throw new KettleStepException(e);
+			}
 		}
 		if (getPathField() != null && getPathField().length() > 0) {
-			ValueMetaInterface v = new ValueMeta(
+			try {
+				ValueMetaInterface v = ValueMetaFactory.createValueMeta(
 					space.environmentSubstitute(getPathField()),
-					ValueMeta.TYPE_STRING);
-			v.setLength(100, -1);
-			v.setOrigin(name);
-			r.addValueMeta(v);
+					ValueMetaString.TYPE_STRING);
+				v.setLength(100, -1);
+				v.setOrigin(name);
+				r.addValueMeta(v);
+			} catch (KettlePluginException e) {
+				throw new KettleStepException(e);
+			}
 		}
 		if (getSizeField() != null && getSizeField().length() > 0) {
-			ValueMetaInterface v = new ValueMeta(
+			try {
+				ValueMetaInterface v = ValueMetaFactory.createValueMeta(
 					space.environmentSubstitute(getSizeField()),
-					ValueMeta.TYPE_INTEGER);
-			v.setOrigin(name);
-			v.setLength(9);
-			r.addValueMeta(v);
+					ValueMetaInteger.TYPE_INTEGER);
+				v.setOrigin(name);
+				v.setLength(9);
+				r.addValueMeta(v);
+			} catch (KettlePluginException e) {
+				throw new KettleStepException(e);
+			}
 		}
 		if (isHiddenField() != null && isHiddenField().length() > 0) {
-			ValueMetaInterface v = new ValueMeta(
+			try {
+				ValueMetaInterface v = ValueMetaFactory.createValueMeta(
 					space.environmentSubstitute(isHiddenField()),
-					ValueMeta.TYPE_BOOLEAN);
-			v.setOrigin(name);
-			r.addValueMeta(v);
+					ValueMetaBoolean.TYPE_BOOLEAN);
+				v.setOrigin(name);
+				r.addValueMeta(v);
+			} catch (KettlePluginException e) {
+				throw new KettleStepException(e);
+			}
 		}
 
 		if (getLastModificationDateField() != null
 				&& getLastModificationDateField().length() > 0) {
-			ValueMetaInterface v = new ValueMeta(
+			try {
+				ValueMetaInterface v = ValueMetaFactory.createValueMeta(
 					space.environmentSubstitute(getLastModificationDateField()),
-					ValueMeta.TYPE_DATE);
-			v.setOrigin(name);
-			r.addValueMeta(v);
+					ValueMetaDate.TYPE_DATE);
+				v.setOrigin(name);
+				r.addValueMeta(v);
+			} catch (KettlePluginException e) {
+				throw new KettleStepException(e);
+			}
 		}
 		if (getUriField() != null && getUriField().length() > 0) {
-			ValueMetaInterface v = new ValueMeta(
+			try {
+				ValueMetaInterface v = ValueMetaFactory.createValueMeta(
 					space.environmentSubstitute(getUriField()),
-					ValueMeta.TYPE_STRING);
-			v.setLength(100, -1);
-			v.setOrigin(name);
-			r.addValueMeta(v);
+					ValueMetaString.TYPE_STRING);
+				v.setLength(100, -1);
+				v.setOrigin(name);
+				r.addValueMeta(v);
+			} catch (KettlePluginException e) {
+				throw new KettleStepException(e);
+			}
 		}
 
 		if (getRootUriField() != null && getRootUriField().length() > 0) {
-			ValueMetaInterface v = new ValueMeta(
+			try {
+				ValueMetaInterface v = ValueMetaFactory.createValueMeta(
 					space.environmentSubstitute(getRootUriField()),
-					ValueMeta.TYPE_STRING);
-			v.setLength(100, -1);
-			v.setOrigin(name);
-			r.addValueMeta(v);
+					ValueMetaString.TYPE_STRING);
+				v.setLength(100, -1);
+				v.setOrigin(name);
+				r.addValueMeta(v);
+			} catch (KettlePluginException e) {
+				throw new KettleStepException(e);
+			}
 		}
 	}
 
@@ -997,7 +1050,7 @@ public class FastJsonInputMeta extends BaseStepMeta implements
 						"field_name"));
 				field.setPath(rep.getStepAttributeString(id_step, i,
 						"field_path"));
-				field.setType(ValueMeta.getType(rep.getStepAttributeString(
+				field.setType(ValueMetaBase.getType(rep.getStepAttributeString(
 						id_step, i, "field_type")));
 				field.setFormat(rep.getStepAttributeString(id_step, i,
 						"field_format"));
