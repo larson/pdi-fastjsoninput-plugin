@@ -114,6 +114,8 @@ public class FastJsonInputMeta extends BaseStepMeta implements
 
 	private boolean defaultPathLeafToNull;
 
+	private boolean jsonLines;
+
 	/** Flag : read url as source */
 	private boolean readurl;
 
@@ -505,6 +507,13 @@ public class FastJsonInputMeta extends BaseStepMeta implements
 	}
 
 	/**
+	 * @return the defaultPathLeafToNull flag
+	 */
+	public boolean isJsonLines() {
+		return jsonLines;
+	}
+
+	/**
 	 * @param ignoreMissingPath
 	 *            the ignoreMissingPath to set
 	 */
@@ -517,6 +526,13 @@ public class FastJsonInputMeta extends BaseStepMeta implements
 	 */
 	public void setDefaultPathLeafToNull(boolean defaultPathLeafToNull) {
 		this.defaultPathLeafToNull = defaultPathLeafToNull;
+	}
+
+	/**
+	 * @param defaultPathLeafToNull
+	 */
+	public void setJsonLines(boolean jsonLines) {
+		this.jsonLines = jsonLines;
 	}
 
 	/**
@@ -606,6 +622,9 @@ public class FastJsonInputMeta extends BaseStepMeta implements
 		retval.append("    "
 				+ XMLHandler
 						.addTagValue("defaultPathLeafToNull", defaultPathLeafToNull));
+		retval.append("    "
+				+ XMLHandler
+						.addTagValue("jsonLines", jsonLines));
 		retval.append("    ").append(
 				XMLHandler.addTagValue("rownum_field", rowNumberField));
 
@@ -705,6 +724,8 @@ public class FastJsonInputMeta extends BaseStepMeta implements
 					stepnode, "ignoreMissingPath"));
 			defaultPathLeafToNull = "Y".equalsIgnoreCase(XMLHandler.getTagValue(
 					stepnode, "defaultPathLeafToNull"));
+			jsonLines = "Y".equalsIgnoreCase(XMLHandler.getTagValue(
+					stepnode, "jsonLines"));
 
 			doNotFailIfNoFile = "Y".equalsIgnoreCase(XMLHandler.getTagValue(
 					stepnode, "doNotFailIfNoFile"));
@@ -798,6 +819,7 @@ public class FastJsonInputMeta extends BaseStepMeta implements
 		IsIgnoreEmptyFile = false;
 		ignoreMissingPath = false;
 		defaultPathLeafToNull = false;
+		jsonLines = false;
 		doNotFailIfNoFile = true;
 		includeFilename = false;
 		filenameField = "";

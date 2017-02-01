@@ -1,5 +1,9 @@
 package com.trail2peak.pdi.fastjsoninput;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
@@ -83,6 +87,40 @@ public class FastJsonReader {
 				// Ignore errors
 			}
 		}
+	}
+
+	public void readFileLines(String filename) throws KettleException, IOException {
+		StringBuffer strJson = new StringBuffer();
+		
+		
+		
+        // Read the file and delimit rows
+		BufferedReader br = null;
+        try {
+        	br = new BufferedReader(new FileReader(filename));
+            String next, line = br.readLine();
+            for (boolean first = true, last = (line == null); !last; first = false, line = next) {
+                last = ((next = br.readLine()) == null);
+
+                if (first) {
+                	strJson.append("[" + line);
+                } else if (last) {
+                	strJson.append(line + "]");
+                } else {
+                	strJson.append(line + ",");
+                }
+            }
+        }
+		finally {
+            if (br != null) 
+            try { 
+            	br.close(); 
+            } 
+            catch (IOException e) {
+            	throw new KettleException(e);
+            }
+        }
+        readString(strJson.toString());
 	}
 
 	public void readString(String value) throws KettleException {

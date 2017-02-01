@@ -30,10 +30,10 @@ import org.pentaho.di.trans.step.StepMetaInterface;
  * Read Json files, parse them and convert them to rows and writes these to one
  * or more output streams.
  * 
- * This is an alternate version of the "JSON Input" step that uses Jayway JsonPath
- * (https://github.com/jayway/JsonPath) instead of a parser based on JavaScript. It
- * is intended to be a drop-in replacement for the "JSON Input" step but should
- * be much faster and memory efficient.
+ * This is an alternate version of the "JSON Input" step that uses Jayway
+ * JsonPath (https://github.com/jayway/JsonPath) instead of a parser based on
+ * JavaScript. It is intended to be a drop-in replacement for the "JSON Input"
+ * step but should be much faster and memory efficient.
  *
  * @author Samatar
  * @author edube
@@ -48,9 +48,8 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 	private FastJsonInputMeta meta;
 	private FastJsonInputData data;
 
-	public FastJsonInput(StepMeta stepMeta,
-			StepDataInterface stepDataInterface, int copyNr,
-			TransMeta transMeta, Trans trans) {
+	public FastJsonInput(StepMeta stepMeta, StepDataInterface stepDataInterface, int copyNr, TransMeta transMeta,
+			Trans trans) {
 		super(stepMeta, stepDataInterface, copyNr, transMeta, trans);
 	}
 
@@ -60,8 +59,7 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 	 * @return
 	 */
 	private Object[] buildEmptyRow() {
-		Object[] rowData = RowDataUtil.allocateRowData(data.outputRowMeta
-				.size());
+		Object[] rowData = RowDataUtil.allocateRowData(data.outputRowMeta.size());
 
 		return rowData;
 	}
@@ -69,30 +67,21 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 	private void handleMissingFiles() throws KettleException {
 		List<FileObject> nonExistantFiles = data.files.getNonExistantFiles();
 		if (nonExistantFiles.size() != 0) {
-			String message = FileInputList
-					.getRequiredFilesDescription(nonExistantFiles);
-			log.logError(BaseMessages.getString(PKG,
-					"FastJsonInput.Log.RequiredFilesTitle"), BaseMessages
-					.getString(PKG, "FastJsonInput.Log.RequiredFiles", message));
+			String message = FileInputList.getRequiredFilesDescription(nonExistantFiles);
+			log.logError(BaseMessages.getString(PKG, "FastJsonInput.Log.RequiredFilesTitle"),
+					BaseMessages.getString(PKG, "FastJsonInput.Log.RequiredFiles", message));
 
-			throw new KettleException(BaseMessages.getString(PKG,
-					"FastJsonInput.Log.RequiredFilesMissing", message));
+			throw new KettleException(BaseMessages.getString(PKG, "FastJsonInput.Log.RequiredFilesMissing", message));
 		}
 
-		List<FileObject> nonAccessibleFiles = data.files
-				.getNonAccessibleFiles();
+		List<FileObject> nonAccessibleFiles = data.files.getNonAccessibleFiles();
 		if (nonAccessibleFiles.size() != 0) {
-			String message = FileInputList
-					.getRequiredFilesDescription(nonAccessibleFiles);
-			log.logError(BaseMessages.getString(PKG,
-					"FastJsonInput.Log.RequiredFilesTitle"), BaseMessages
-					.getString(PKG,
-							"FastJsonInput.Log.RequiredNotAccessibleFiles",
-							message));
+			String message = FileInputList.getRequiredFilesDescription(nonAccessibleFiles);
+			log.logError(BaseMessages.getString(PKG, "FastJsonInput.Log.RequiredFilesTitle"),
+					BaseMessages.getString(PKG, "FastJsonInput.Log.RequiredNotAccessibleFiles", message));
 
-			throw new KettleException(BaseMessages.getString(PKG,
-					"FastJsonInput.Log.RequiredNotAccessibleFilesMissing",
-					message));
+			throw new KettleException(
+					BaseMessages.getString(PKG, "FastJsonInput.Log.RequiredNotAccessibleFilesMissing", message));
 		}
 	}
 
@@ -104,8 +93,7 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 			if (data.readrow == null) {
 				// finished processing!
 				if (log.isDetailed()) {
-					logDetailed(BaseMessages.getString(PKG,
-							"FastJsonInput.Log.FinishedProcessing"));
+					logDetailed(BaseMessages.getString(PKG, "FastJsonInput.Log.FinishedProcessing"));
 				}
 				return false;
 			}
@@ -118,69 +106,57 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 
 				// Check if source field is provided
 				if (Const.isEmpty(meta.getFieldValue())) {
-					logError(BaseMessages.getString(PKG,
-							"FastJsonInput.Log.NoField"));
-					throw new KettleException(BaseMessages.getString(PKG,
-							"FastJsonInput.Log.NoField"));
+					logError(BaseMessages.getString(PKG, "FastJsonInput.Log.NoField"));
+					throw new KettleException(BaseMessages.getString(PKG, "FastJsonInput.Log.NoField"));
 				}
 
 				// cache the position of the field
 				if (data.indexSourceField < 0) {
-					data.indexSourceField = getInputRowMeta().indexOfValue(
-							meta.getFieldValue());
+					data.indexSourceField = getInputRowMeta().indexOfValue(meta.getFieldValue());
 					if (data.indexSourceField < 0) {
 						// The field is unreachable !
-						logError(BaseMessages.getString(PKG,
-								"FastJsonInput.Log.ErrorFindingField",
+						logError(BaseMessages.getString(PKG, "FastJsonInput.Log.ErrorFindingField",
 								meta.getFieldValue()));
 						throw new KettleException(BaseMessages.getString(PKG,
-								"FastJsonInput.Exception.CouldnotFindField",
-								meta.getFieldValue()));
+								"FastJsonInput.Exception.CouldnotFindField", meta.getFieldValue()));
 					}
 				}
-				
-				// if RemoveSourceField option is set, we remove the source field from the output meta
+
+				// if RemoveSourceField option is set, we remove the source
+				// field from the output meta
 				if (meta.isRemoveSourceField()) {
 					data.outputRowMeta.removeValueMeta(data.indexSourceField);
-					// Get total previous fields minus one since we remove source field
+					// Get total previous fields minus one since we remove
+					// source field
 					data.totalpreviousfields = data.inputRowMeta.size() - 1;
 				} else {
 					// Get total previous fields
 					data.totalpreviousfields = data.inputRowMeta.size();
 				}
-				
-				meta.getFields(data.outputRowMeta, getStepname(), null, null,
-						this, repository, metaStore);
 
-
+				meta.getFields(data.outputRowMeta, getStepname(), null, null, this, repository, metaStore);
 
 				// Create convert meta-data objects that will contain Date &
 				// Number formatters
-				data.convertRowMeta = data.outputRowMeta
-						.cloneToType(ValueMetaInterface.TYPE_STRING);
+				data.convertRowMeta = data.outputRowMeta.cloneToType(ValueMetaInterface.TYPE_STRING);
 
 			}
 
 			// get source field value
-			String fieldValue = getInputRowMeta().getString(data.readrow,
-					data.indexSourceField);
+			String fieldValue = getInputRowMeta().getString(data.readrow, data.indexSourceField);
 
 			if (log.isDetailed()) {
-				logDetailed(BaseMessages.getString(PKG,
-						"FastJsonInput.Log.SourceValue", meta.getFieldValue(),
-						fieldValue));
+				logDetailed(
+						BaseMessages.getString(PKG, "FastJsonInput.Log.SourceValue", meta.getFieldValue(), fieldValue));
 			}
 
 			if (meta.getIsAFile()) {
 
 				// source is a file.
 				data.file = KettleVFS.getFileObject(fieldValue, getTransMeta());
-				if (meta.isIgnoreEmptyFile()
-						&& data.file.getContent().getSize() == 0) {
+				if (meta.isIgnoreEmptyFile() && data.file.getContent().getSize() == 0) {
 					// log only basic as a warning (was before logError)
-					logBasic(BaseMessages.getString(PKG,
-							"FastJsonInput.Error.FileSizeZero",
-							data.file.getName()));
+					logBasic(BaseMessages.getString(PKG, "FastJsonInput.Error.FileSizeZero", data.file.getName()));
 					readNextString();
 				}
 			} else {
@@ -190,8 +166,7 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 
 			readFileOrString();
 		} catch (Exception e) {
-			logError(BaseMessages.getString(PKG,
-					"FastJsonInput.Log.UnexpectedError", e.toString()));
+			logError(BaseMessages.getString(PKG, "FastJsonInput.Log.UnexpectedError", e.toString()));
 			stopAll();
 			logError(Const.getStackTracker(e));
 			setErrors(1);
@@ -204,11 +179,9 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 	private void addFileToResultFilesname(FileObject file) throws Exception {
 		if (meta.addResultFile()) {
 			// Add this to the result file names...
-			ResultFile resultFile = new ResultFile(
-					ResultFile.FILE_TYPE_GENERAL, file, getTransMeta()
-							.getName(), getStepname());
-			resultFile.setComment(BaseMessages.getString(PKG,
-					"FastJsonInput.Log.FileAddedResult"));
+			ResultFile resultFile = new ResultFile(ResultFile.FILE_TYPE_GENERAL, file, getTransMeta().getName(),
+					getStepname());
+			resultFile.setComment(BaseMessages.getString(PKG, "FastJsonInput.Log.FileAddedResult"));
 			addResultFile(resultFile);
 		}
 	}
@@ -217,8 +190,7 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 		try {
 			if (data.filenr >= data.files.nrOfFiles()) {
 				if (log.isDetailed()) {
-					logDetailed(BaseMessages.getString(PKG,
-							"FastJsonInput.Log.FinishedProcessing"));
+					logDetailed(BaseMessages.getString(PKG, "FastJsonInput.Log.FinishedProcessing"));
 				}
 				return false;
 			}
@@ -228,18 +200,14 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 			}
 			// get file
 			data.file = data.files.getFile(data.filenr);
-			if (meta.isIgnoreEmptyFile()
-					&& data.file.getContent().getSize() == 0) {
+			if (meta.isIgnoreEmptyFile() && data.file.getContent().getSize() == 0) {
 				// log only basic as a warning (was before logError)
-				logBasic(BaseMessages.getString(PKG,
-						"FastJsonInput.Error.FileSizeZero",
-						"" + data.file.getName()));
+				logBasic(BaseMessages.getString(PKG, "FastJsonInput.Error.FileSizeZero", "" + data.file.getName()));
 				openNextFile();
 			}
 			readFileOrString();
 		} catch (Exception e) {
-			logError(BaseMessages.getString(PKG,
-					"FastJsonInput.Log.UnableToOpenFile", "" + data.filenr,
+			logError(BaseMessages.getString(PKG, "FastJsonInput.Log.UnableToOpenFile", "" + data.filenr,
 					data.file.toString(), e.toString()));
 			stopAll();
 			setErrors(1);
@@ -252,31 +220,25 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 		if (data.file != null) {
 			data.filename = KettleVFS.getFilename(data.file);
 			// Add additional fields?
-			if (meta.getShortFileNameField() != null
-					&& meta.getShortFileNameField().length() > 0) {
+			if (meta.getShortFileNameField() != null && meta.getShortFileNameField().length() > 0) {
 				data.shortFilename = data.file.getName().getBaseName();
 			}
 			if (meta.getPathField() != null && meta.getPathField().length() > 0) {
 				data.path = KettleVFS.getFilename(data.file.getParent());
 			}
-			if (meta.isHiddenField() != null
-					&& meta.isHiddenField().length() > 0) {
+			if (meta.isHiddenField() != null && meta.isHiddenField().length() > 0) {
 				data.hidden = data.file.isHidden();
 			}
-			if (meta.getExtensionField() != null
-					&& meta.getExtensionField().length() > 0) {
+			if (meta.getExtensionField() != null && meta.getExtensionField().length() > 0) {
 				data.extension = data.file.getName().getExtension();
 			}
-			if (meta.getLastModificationDateField() != null
-					&& meta.getLastModificationDateField().length() > 0) {
-				data.lastModificationDateTime = new Date(data.file.getContent()
-						.getLastModifiedTime());
+			if (meta.getLastModificationDateField() != null && meta.getLastModificationDateField().length() > 0) {
+				data.lastModificationDateTime = new Date(data.file.getContent().getLastModifiedTime());
 			}
 			if (meta.getUriField() != null && meta.getUriField().length() > 0) {
 				data.uriName = data.file.getName().getURI();
 			}
-			if (meta.getRootUriField() != null
-					&& meta.getRootUriField().length() > 0) {
+			if (meta.getRootUriField() != null && meta.getRootUriField().length() > 0) {
 				data.rootUriName = data.file.getName().getRootURI();
 			}
 			// Check if file is empty
@@ -289,8 +251,7 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 			data.filenr++;
 
 			if (log.isDetailed()) {
-				logDetailed(BaseMessages.getString(PKG,
-						"FastJsonInput.Log.OpeningFile", data.file.toString()));
+				logDetailed(BaseMessages.getString(PKG, "FastJsonInput.Log.OpeningFile", data.file.toString()));
 			}
 
 			addFileToResultFilesname(data.file);
@@ -304,7 +265,10 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 
 		// Read JSON source
 		if (data.file != null) {
-			data.jsonReader.readFile(data.filename);
+			if (meta.isJsonLines())
+				data.jsonReader.readFileLines(data.filename);
+			else
+				data.jsonReader.readFile(data.filename);
 		} else {
 			if (meta.isReadUrl()) {
 				data.jsonReader.readUrl(data.stringToParse);
@@ -320,11 +284,9 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 		for (int i = 0; i < data.nrInputFields; i++) {
 			String path = meta.getInputFields()[i].getPath();
 			JsonResultList ja = data.jsonReader.getPath(path);
-			if (data.nrrecords != -1 && data.nrrecords != ja.size()
-					&& !ja.isNull()) {
-				throw new KettleException(BaseMessages.getString(PKG,
-						"FastJsonInput.Error.BadStructure", ja.size(), path,
-						prevPath, data.nrrecords));
+			if (data.nrrecords != -1 && data.nrrecords != ja.size() && !ja.isNull()) {
+				throw new KettleException(BaseMessages.getString(PKG, "FastJsonInput.Error.BadStructure", ja.size(),
+						path, prevPath, data.nrrecords));
 			}
 			resultList.add(ja);
 			if (data.nrrecords == -1 && !ja.isNull()) {
@@ -356,22 +318,19 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 		resultList = null;
 
 		if (log.isDetailed()) {
-			logDetailed(BaseMessages.getString(PKG,
-					"FastJsonInput.Log.NrRecords", data.nrrecords));
+			logDetailed(BaseMessages.getString(PKG, "FastJsonInput.Log.NrRecords", data.nrrecords));
 		}
 
 	}
 
-	public boolean processRow(StepMetaInterface smi, StepDataInterface sdi)
-			throws KettleException {
+	public boolean processRow(StepMetaInterface smi, StepDataInterface sdi) throws KettleException {
 		if (first && !meta.isInFields()) {
 			first = false;
 
 			data.files = meta.getFiles(this);
 
 			if (!meta.isdoNotFailIfNoFile() && data.files.nrOfFiles() == 0) {
-				throw new KettleException(BaseMessages.getString(PKG,
-						"FastJsonInput.Log.NoFiles"));
+				throw new KettleException(BaseMessages.getString(PKG, "FastJsonInput.Log.NoFiles"));
 			}
 
 			handleMissingFiles();
@@ -379,13 +338,11 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 			// Create the output row meta-data
 			data.outputRowMeta = new RowMeta();
 
-			meta.getFields(data.outputRowMeta, getStepname(), null, null, this,
-					repository, metaStore);
+			meta.getFields(data.outputRowMeta, getStepname(), null, null, this, repository, metaStore);
 
 			// Create convert meta-data objects that will contain Date & Number
 			// formatters
-			data.convertRowMeta = data.outputRowMeta
-					.cloneToType(ValueMetaInterface.TYPE_STRING);
+			data.convertRowMeta = data.outputRowMeta.cloneToType(ValueMetaInterface.TYPE_STRING);
 		}
 		Object[] r = null;
 		try {
@@ -397,9 +354,7 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 			}
 
 			if (log.isRowLevel()) {
-				logRowlevel(BaseMessages.getString(PKG,
-						"FastJsonInput.Log.ReadRow",
-						data.outputRowMeta.getString(r)));
+				logRowlevel(BaseMessages.getString(PKG, "FastJsonInput.Log.ReadRow", data.outputRowMeta.getString(r)));
 			}
 			incrementLinesInput();
 			data.rownr++;
@@ -419,8 +374,7 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 				sendToErrorRow = true;
 				errorMessage = e.toString();
 			} else {
-				logError(BaseMessages.getString(PKG,
-						"FastJsonInput.ErrorInStepRunning", e.getMessage()));
+				logError(BaseMessages.getString(PKG, "FastJsonInput.ErrorInStepRunning", e.getMessage()));
 				setErrors(1);
 				stopAll();
 				setOutputDone(); // signal end to receiver(s)
@@ -428,8 +382,7 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 			}
 			if (sendToErrorRow) {
 				// Simply add this row to the error row
-				putError(getInputRowMeta(), r, 1, errorMessage, null,
-						"JsonInput001");
+				putError(getInputRowMeta(), r, 1, errorMessage, null, "JsonInput001");
 			}
 
 		}
@@ -489,7 +442,7 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 			List<Object> ls = data.resultList.get(i).getObjectList();
 			String nodevalue = null;
 			if (ls != null) {
-				Object jo = ls.get( data.recordnr );
+				Object jo = ls.get(data.recordnr);
 				if (jo != null) {
 					if (jo instanceof LinkedHashMap) {
 						nodevalue = JSONObject.toJSONString((LinkedHashMap<?, ?>) jo);
@@ -516,23 +469,18 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 
 			if (meta.isInFields()) {
 				// Add result field to input stream
-				outputRowData = RowDataUtil.addValueData(outputRowData,
-						data.totalpreviousfields + i, nodevalue);
+				outputRowData = RowDataUtil.addValueData(outputRowData, data.totalpreviousfields + i, nodevalue);
 			}
 			// Do conversions
 			//
-			ValueMetaInterface targetValueMeta = data.outputRowMeta
-					.getValueMeta(data.totalpreviousfields + i);
-			ValueMetaInterface sourceValueMeta = data.convertRowMeta
-					.getValueMeta(data.totalpreviousfields + i);
-			outputRowData[data.totalpreviousfields + i] = targetValueMeta
-					.convertData(sourceValueMeta, nodevalue);
+			ValueMetaInterface targetValueMeta = data.outputRowMeta.getValueMeta(data.totalpreviousfields + i);
+			ValueMetaInterface sourceValueMeta = data.convertRowMeta.getValueMeta(data.totalpreviousfields + i);
+			outputRowData[data.totalpreviousfields + i] = targetValueMeta.convertData(sourceValueMeta, nodevalue);
 
 			// Do we need to repeat this field if it is null?
 			if (meta.getInputFields()[i].isRepeated()) {
 				if (data.previousRow != null && Const.isEmpty(nodevalue)) {
-					outputRowData[data.totalpreviousfields + i] = data.previousRow[data.totalpreviousfields
-							+ i];
+					outputRowData[data.totalpreviousfields + i] = data.previousRow[data.totalpreviousfields + i];
 				}
 			}
 		} // End of loop over fields...
@@ -550,13 +498,11 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 			outputRowData[rowIndex++] = new Long(data.rownr);
 		}
 		// Possibly add short filename...
-		if (meta.getShortFileNameField() != null
-				&& meta.getShortFileNameField().length() > 0) {
+		if (meta.getShortFileNameField() != null && meta.getShortFileNameField().length() > 0) {
 			outputRowData[rowIndex++] = data.shortFilename;
 		}
 		// Add Extension
-		if (meta.getExtensionField() != null
-				&& meta.getExtensionField().length() > 0) {
+		if (meta.getExtensionField() != null && meta.getExtensionField().length() > 0) {
 			outputRowData[rowIndex++] = data.extension;
 		}
 		// add path
@@ -572,8 +518,7 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 			outputRowData[rowIndex++] = new Boolean(data.path);
 		}
 		// Add modification date
-		if (meta.getLastModificationDateField() != null
-				&& meta.getLastModificationDateField().length() > 0) {
+		if (meta.getLastModificationDateField() != null && meta.getLastModificationDateField().length() > 0) {
 			outputRowData[rowIndex++] = data.lastModificationDateTime;
 		}
 		// Add Uri
@@ -581,16 +526,17 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 			outputRowData[rowIndex++] = data.uriName;
 		}
 		// Add RootUri
-		if (meta.getRootUriField() != null
-				&& meta.getRootUriField().length() > 0) {
+		if (meta.getRootUriField() != null && meta.getRootUriField().length() > 0) {
 			outputRowData[rowIndex++] = data.rootUriName;
 		}
 		data.recordnr++;
 
 		RowMetaInterface irow = getInputRowMeta();
 
-		data.previousRow = irow == null ? outputRowData : irow
-				.cloneRow(outputRowData); // copy it to make
+		data.previousRow = irow == null ? outputRowData : irow.cloneRow(outputRowData); // copy
+																						// it
+																						// to
+																						// make
 		// surely the next step doesn't change it in between...
 
 		return outputRowData;
@@ -612,8 +558,7 @@ public class FastJsonInput extends BaseStep implements StepInterface {
 			try {
 				// Init a new JSON reader
 				data.jsonReader = new FastJsonReader();
-				data.jsonReader
-						.setIgnoreMissingPath(meta.isIgnoreMissingPath());
+				data.jsonReader.setIgnoreMissingPath(meta.isIgnoreMissingPath());
 				data.jsonReader.setDefaultPathLeafToNull(meta.isDefaultPathLeafToNull());
 
 			} catch (KettleException e) {

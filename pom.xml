@@ -224,21 +224,34 @@
 						<phase>install</phase>
 						<configuration>
 							<tasks>
-								<echo message="Looking for local PDI installation in ${pdi.home}"/>
+								<echo message="Looking for local PDI installation in ${pdi.home1}"/>
+								<echo message="Looking for local PDI installation in ${pdi.home2}"/>
 
 								<!-- change these to adapt to your environment -->
-								<property name="kettle-dir" location="%PROGRAMFILES%/Pentaho/pdi-ce-6.0.1.0-386/data-integration" />
-								<available file="${pdi.home}" type="dir" property="kettle-dir.present" />
+								<property name="kettle-dir1" location="c:/progra~1/pentaho/pdi-ce-6.0.1.0-386/data-integration" />
+								<available file="${pdi.home1}" type="dir" property="kettle-dir1.present" />
+								
+								<!-- change these to adapt to your environment -->
+								<property name="kettle-dir2" location="X:/Automation/Tools/Pentaho/pdi-ce-6.1.0.1-196/data-integration" />
+								<available file="${pdi.home2}" type="dir" property="kettle-dir2.present" />
 
-								<fail unless="kettle-dir.present" message="PDI installation not found. Please specify the path to your PDI installation in build/build.properties" />
+								<fail unless="kettle-dir1.present" message="PDI installation not found. Please specify the path to your PDI installation in build/build.properties" />
+								<fail unless="kettle-dir2.present" message="PDI installation not found. Please specify the path to your PDI installation in build/build.properties" />
 
 								<!-- remove previous installations -->
-								<delete dir="${pdi.home}/plugins/steps/${project.name}" />
+								<delete dir="${pdi.home1}/plugins/steps/${project.name}" />
+								<delete dir="${pdi.home2}/plugins/steps/${project.name}" />
 
 								<!-- put fresh files in place -->
-								<mkdir dir="${pdi.home}/plugins/steps/${project.name}" />
+								<mkdir dir="${pdi.home1}/plugins/steps/${project.name}" />
+								<mkdir dir="${pdi.home2}/plugins/steps/${project.name}" />
 
-								<copy todir="${pdi.home}/plugins/steps/${project.name}">
+								<copy todir="${pdi.home1}/plugins/steps/${project.name}">
+									<fileset dir="${pdi.plugin.dir}" includes="**/*.*" />
+									<fileset dir="${pdi.plugin.dir}" includes="**" />
+								</copy>
+								
+								<copy todir="${pdi.home2}/plugins/steps/${project.name}">
 									<fileset dir="${pdi.plugin.dir}" includes="**/*.*" />
 									<fileset dir="${pdi.plugin.dir}" includes="**" />
 								</copy>
